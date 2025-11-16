@@ -1,0 +1,81 @@
+<body style="
+    background: transparent;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-family: Arial;
+">
+    <img id="classe" src="asset/foema.png" style="height: 100px;">
+    
+    <div id="lokiscore" style="
+        color: white;
+        font-size: 48px;
+        margin-left: 20px;
+        text-shadow: 0px 0px 6px black;
+    ">Carregando...</div>        
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const nick = params.get("nick");
+
+async function atualizar(nick) {
+    if (!nick) {
+        limparTela();
+        return;
+    }
+
+    try {
+        const resp = await fetch("/score?" + new URLSearchParams({ nick }));
+
+        // Se a API retornar 204 significa "não há conteúdo"
+        if (resp.status === 204) {
+            console.warn("Nenhum conteúdo recebido da API (204).");
+            limparTela();
+            return;
+        }
+
+        // Se a API retornar 404 significa "nick não encontrado"
+        if (resp.status === 404) {
+            console.warn("Nick não encontrado na API (404).");
+            limparTela();
+            return;
+        }
+
+        // Qualquer erro HTTP fora os previstos
+        if (!resp.ok) {
+            console.error("Erro HTTP inesperado:", resp.status);
+            limparTela();
+            return;
+        }
+
+        const data = await resp.json();
+
+        // Segurança extra: se o JSON vier vazio ou malformado
+        if (!data || !data.lokiscore) {
+            limparTela();
+            return;
+        }
+
+        // Atualizar overlay
+        document.getElementById("classe").src = "asset/" + data.classe + ".png";
+        document.getElementById("lokiscore").innerText = "LokiScore: " +  Number(data.lokiscore).toLocaleString("pt-BR");
+        
+
+    } catch (err) {
+        console.error("Erro ao atualizar:", err);
+        limparTela();
+    }
+}
+
+function limparTela() {
+    document.getElementById("classe").src = "";
+    document.getElementById("lokiscore").innerText = "";    
+}
+
+// Atualiza imediatamente ao carregar
+atualizar(nick);
+
+// Atualiza automaticamente a cada 60 segundos
+setInterval(() => atualizar(nick), 60 * 1000);
+</script>
+</body>
