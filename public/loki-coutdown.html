@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overlay Loki Minimalista</title>
+
+  <!-- Fonte Medieval -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+    }
+
+    .wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px; /* distância menor e elegante */
+      background: transparent;
+    }
+
+    #timer {
+      font-size: 90px;
+      color: #00ff7f;
+      text-shadow:
+        0 0 10px #00ff7f,
+        0 0 20px #0f0,
+        0 0 30px #ffd700;
+      letter-spacing: 3px;
+      text-align: center;
+    }
+
+    /* Marca mais compacta */
+    .brand svg {
+      width: 120px;
+      height: 30px;
+      opacity: 0.85; /* leve suavização para ficar elegante */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+
+    <!-- TIMER HH:MM:SS -->
+    <div id="timer">00:00:00</div>
+
+    <!-- Marca compacta e discreta -->
+    <div class="brand">
+      <svg viewBox="0 0 420 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(10,6) scale(0.7)">
+          <path d="M60 10c8-12 34-12 48 2 14 14 6 40-8 54-10 10-22 10-32 8-12-3-26-16-30-30-4-14 6-34 22-34z"
+                fill="#0B6623"/>
+          <path d="M88 8c6-6 16-8 22-6 0 0-8 8-10 14-3 8-12 12-18 8 0 0 4-10 6-16z" fill="#FFD700" opacity="0.9"/>
+        </g>
+
+        <text x="150" y="65" font-family="Verdana, Arial, sans-serif" font-size="42" fill="#D4AF37" font-weight="700">
+          feito por
+        </text>
+        <text x="150" y="100" font-family="Verdana, Arial, sans-serif" font-size="42" fill="#7EF29A" font-weight="800">
+          linkin13
+        </text>
+      </svg>
+    </div>
+
+  </div>
+
+<script>
+(function(){
+  const target = new Date('2025-11-18T12:00:00-03:00').getTime();
+  const el = document.getElementById("timer");
+
+  function pad(n){
+    return String(n).padStart(2, '0');
+  }
+
+  function update(){
+    const now = Date.now();
+    let diff = target - now;
+
+    if (diff <= 0) {
+      el.textContent = "00:00:00";
+      return;
+    }
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    el.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
+  update();
+  setInterval(update, 1000);
+})();
+</script>
+
+</body>
+</html>
