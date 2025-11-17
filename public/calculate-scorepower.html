@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Score Power - Loki Edition</title>
+
+  <!-- Fonte medieval -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Cinzel', serif;
+      background: linear-gradient(#0b1f0f, #041006);
+      color: #e3d7a1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: rgba(13, 32, 20, 0.85);
+      border: 2px solid #c7a94b;
+      border-radius: 12px;
+      padding: 25px;
+      width: 420px;
+      box-shadow: 0 0 20px #0f3d1a;
+    }
+
+    h2 {
+      text-align: center;
+      color: #d4c27a;
+      font-size: 26px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #264d25;
+    }
+
+    label {
+      margin-top: 10px;
+      display: block;
+      font-weight: 700;
+      color: #e9ddae;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #c0aa4e;
+      background: #102515;
+      color: #e3d7a1;
+      font-size: 15px;
+      outline: none;
+    }
+
+    select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: linear-gradient(#1b5828, #0d3a19);
+      border: 2px solid #c7a94b;
+      color: #eadfb3;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(#2b7a38, #115422);
+      box-shadow: 0 0 12px #1f5b2b;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-size: 20px;
+      text-align: center;
+      font-weight: 700;
+      color: #d1c388;
+      text-shadow: 0 0 6px #264d25;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>⚔ Calculadora de Score Power ⚔</h2>
+
+  <!-- Tipo de Item -->
+  <label for="tipo">Tipo de Item:</label>
+  <select id="tipo">
+    <option value="">Selecione...</option>
+    <option value="equip">Elmo, Peito, Calça, Bota, Luva</option>
+    <option value="arma2m">Arma de duas mãos</option>
+    <option value="acessorio">Brinco, Colar, Cinto</option>
+    <option value="arma1m">Armas de uma mão e Escudo</option>
+    <option value="medalha">Medalhas</option>
+    <option value="pedra">Pedra Espiritual</option>
+  </select>
+
+  <!-- Evolução -->
+  <label for="evolucao">Evolução:</label>
+  <select id="evolucao">
+    <option value="">Selecione...</option>
+    <option value="1">1ª Evolução</option>
+    <option value="2">2ª Evolução</option>
+    <option value="3">3ª Evolução</option>
+  </select>
+
+  <!-- Base -->
+  <label for="base">Base:</label>
+  <input type="number" id="base" readonly>
+
+  <!-- Tier -->
+  <label for="tier">Tier:</label>
+  <input type="number" id="tier" min="0" value="0">
+
+  <!-- Refinamento -->
+  <label for="refino">Refinamento:</label>
+  <input type="number" id="refino" min="0" max="15" value="0">
+
+  <button onclick="calcular()">Calcular Score Power</button>
+
+  <div id="resultado"></div>
+</div>
+
+<script>
+  const tabelaBase = {
+    equip:   { "1": 20, "2": 300, "3": 4500 },
+    arma2m:  { "1": 20, "2": 300, "3": 4500 },
+    acessorio: { "1": 20, "2": 300, "3": 4500 },
+    arma1m: { "1": 10, "2": 150, "3": 2250 },
+    medalha: { "1": 5000, "2": 5000, "3": 5000 },
+    pedra:   { "1": 1500, "2": null, "3": null }
+  };
+
+  function atualizarBase() {
+    const tipo = document.getElementById("tipo").value;
+    const evolucao = document.getElementById("evolucao").value;
+
+    // Travar evolução para Pedra Espiritual
+    if (tipo === "pedra") {
+      document.getElementById("evolucao").value = "1";
+      document.getElementById("evolucao").disabled = true;
+    } else {
+      document.getElementById("evolucao").disabled = false;
+    }
+
+    if (!tipo || !evolucao) {
+      document.getElementById("base").value = "";
+      return;
+    }
+
+    const valor = tabelaBase[tipo][evolucao];
+    document.getElementById("base").value = valor ?? 0;
+  }
+
+  document.getElementById("tipo").addEventListener("change", atualizarBase);
+  document.getElementById("evolucao").addEventListener("change", atualizarBase);
+
+  function calcular() {
+    const base = Number(document.getElementById("base").value);
+    const tier = Number(document.getElementById("tier").value);
+    const refino = Number(document.getElementById("refino").value);
+
+    if (tier < 0 || refino < 0) {
+      document.getElementById("resultado").innerText = "Valores negativos não são permitidos.";
+      return;
+    }
+
+    if (refino > 15) {
+      document.getElementById("resultado").innerText = "O refinamento máximo permitido é 15.";
+      return;
+    }
+
+    if (!base || isNaN(tier) || isNaN(refino)) {
+      document.getElementById("resultado").innerText = "Preencha todos os campos corretamente.";
+      return;
+    }
+
+    const score = (base + (tier * 100)) * refino;
+    document.getElementById("resultado").innerText = "Score Power: " + score;
+  }
+</script>
+
+</body>
+</html>
