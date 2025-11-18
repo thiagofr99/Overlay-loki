@@ -93,7 +93,7 @@ app.get("/score", async (req, res) => {
     if (!estadoAtual) return res.status(404).send();
 
     const retornoApi = {
-        lokiscore: estadoAtual.data.maxPR,
+        lokiscore: estadoAtual.data.totalScore,
         classe: calculaClasse(estadoAtual.data.class)
     };
 
