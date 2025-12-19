@@ -1,0 +1,95 @@
+openapi: 3.0.3
+info:
+  title: Status do Jogador API
+  description: API para consultar o status de atividades do jogador pelo nick.
+  version: 1.0.0
+
+tags:
+  - name: Player
+    description: Operações relacionadas ao jogador
+
+servers:
+  - url: https://api.seuservidor.com
+
+paths:
+  /player/status:
+    get:
+      tags:
+        - Player
+      summary: Consulta status do jogador
+      description: Retorna o status das atividades do jogador com base no nick informado.
+      parameters:
+        - name: nick
+          in: query
+          required: true
+          description: Nick do jogador
+          schema:
+            type: string
+            example: Niknill
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStatus'
+              example:
+                nick: "Niknill"
+                infernal: [1, 1, 1, 1]
+                checkin: true
+                checkinInfernal: true
+                checkinCarta: false
+                deserto: false
+                espolios: true
+                siliconCoin: false
+                monsterWanted: false
+                interReport: false
+        '400':
+          description: Requisição inválida
+        '404':
+          description: Jogador não encontrado
+        '500':
+          description: Erro interno do servidor
+
+components:
+  schemas:
+    PlayerStatus:
+      type: object
+      properties:
+        nick:
+          type: string
+          description: Nick do jogador
+        infernal:
+          type: array
+          description: Status do infernal
+          items:
+            type: integer
+            enum: [0, 1, 2]
+          example: [1, 1, 1, 1]
+        checkin:
+          type: boolean
+        checkinInfernal:
+          type: boolean
+        checkinCarta:
+          type: boolean
+        deserto:
+          type: boolean
+        espolios:
+          type: boolean
+        siliconCoin:
+          type: boolean
+        monsterWanted:
+          type: boolean
+        interReport:
+          type: boolean
+      required:
+        - nick
+        - infernal
+        - checkin
+        - checkinInfernal
+        - checkinCarta
+        - deserto
+        - espolios
+        - siliconCoin
+        - monsterWanted
+        - interReport

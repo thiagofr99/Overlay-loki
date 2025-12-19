@@ -11,8 +11,9 @@ let estado = {
 };
 */
 
-function buscarPorCharname(array, charname) {
-    const index = array.findIndex(obj => obj.charname === charname);
+function buscarPorCharname(array, charname, camelCase = false) {
+    var propertyName = camelCase ? 'charName' : 'charname';
+    const index = array.findIndex(obj => obj[propertyName] === charname);
     if (index === -1) return null;
     return {
         index,
@@ -65,6 +66,19 @@ async function atualizar(nick) {
     }
 }
 
+async function atualizarRanking(){
+    try {
+        const resp = await fetch("https://rn3xfhamppsetddkod6vwc24lu0lhcek.lambda-url.us-east-1.on.aws/royal-rank?category=champion");
+        const data = await resp.json();  // aqui você extrai o corpo JSON da resposta   
+        const respFinal = buscarPorCharname(data, nick, true);
+        
+        if (!respFinal) return null;
+    } catch (err) {
+        console.log("Erro ao atualizar:", err);
+        return null;
+    }
+}
+
 // Atualiza imediato + a cada 60s
 //atualizar();
 //setInterval(atualizar, 60000);
@@ -100,6 +114,18 @@ app.get("/score", async (req, res) => {
     res.json(retornoApi);
 });
 
+app.get("/ranking", async (req, res) => {
+    const nick = req.query.nick;
+    if (!nick) return res.status(204).send();
+
+    const estadoAtual = await atualizarRanking(nick);
+    if (!estadoAtual) return res.status(404).send();
+
+    const retornoApi = {
+        position: estadoAtual.index + 1,
+        points: estadoAtual.data.total    
+    };
+});
 //app.listen(8080, () => console.log("Servidor rodando em http://localhost:8080"));
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log("Rodando na porta " + PORT));
