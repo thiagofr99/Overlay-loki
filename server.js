@@ -11,8 +11,8 @@ let estado = {
 };
 */
 
-function buscarPorCharname(array, charname, camelCase = false) {
-    var propertyName = camelCase ? 'charName' : 'charname';
+function buscarPorCharname(array, charname, camelCase = false, novoNome) {
+    var propertyName = novoNome ? novoNome : (camelCase ? 'charName' : 'charname');
     const index = array.findIndex(obj => obj[propertyName] === charname);
     if (index === -1) return null;
     return {
@@ -66,7 +66,7 @@ async function atualizar(nick) {
     }
 }
 
-async function atualizarRanking(){
+async function atualizarRanking(nick){
     try {
         const resp = await fetch("https://rn3xfhamppsetddkod6vwc24lu0lhcek.lambda-url.us-east-1.on.aws/royal-rank?category=champion");
         const data = await resp.json();  // aqui você extrai o corpo JSON da resposta   
@@ -79,6 +79,32 @@ async function atualizarRanking(){
     }
 }
 
+
+async function atualizarRankingLevel(nick){
+    try {
+
+        const resp = await fetch(
+            "https://rn3xfhamppsetddkod6vwc24lu0lhcek.lambda-url.us-east-1.on.aws/component-rank",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({"options":{}})
+            }
+        );
+        
+        const data = await resp.json();  // aqui você extrai o corpo JSON da resposta
+        const respFinal = buscarPorCharname(data, nick, false, 'name');
+
+        if (!respFinal) return null;
+        return respFinal;
+    } catch (err) {
+        console.log("Erro ao atualizar:", err);
+        return null;
+    }
+
+}
 // Atualiza imediato + a cada 60s
 //atualizar();
 //setInterval(atualizar, 60000);
@@ -108,6 +134,22 @@ app.get("/score", async (req, res) => {
 
     const retornoApi = {
         lokiscore: estadoAtual.data.totalScore,
+        classe: calculaClasse(estadoAtual.data.class)
+    };
+
+    res.json(retornoApi);
+});
+
+// Endpoint JSON para o overlay
+app.get("/pr", async (req, res) => {
+    const nick = req.query.nick;
+    if (!nick) return res.status(204).send();
+
+    const estadoAtual = await atualizarRankingLevel(nick);
+    if (!estadoAtual) return res.status(404).send();
+
+    const retornoApi = {
+        powerRating: estadoAtual.data.points,
         classe: calculaClasse(estadoAtual.data.class)
     };
 
