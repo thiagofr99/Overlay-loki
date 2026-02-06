@@ -43,7 +43,7 @@ paths:
                 espolios: true
                 siliconCoin: false
                 monsterWanted: false
-                interReport: false
+                intelReport: false
         '400':
           description: Requisição inválida
         '404':
@@ -80,7 +80,7 @@ components:
           type: boolean
         monsterWanted:
           type: boolean
-        interReport:
+        intelReport:
           type: boolean
       required:
         - nick
@@ -92,4 +92,4 @@ components:
         - espolios
         - siliconCoin
         - monsterWanted
-        - interReport
+        - intelReport
