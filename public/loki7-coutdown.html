@@ -2,16 +2,15 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Overlay Loki Minimalista</title>
-
-  <!-- Fonte Medieval -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
-
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <title>Overlay Nórdico Seguro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      padding: 0;
       background: transparent;
       height: 100vh;
       display: flex;
@@ -20,111 +19,87 @@
       font-family: 'Cinzel', serif;
     }
 
-    .wrap {
+    .container {
+      background: rgba(11, 46, 31, 0.5); 
+      padding: 30px 50px;
+      border-radius: 10px;
+      border: 2px solid #D4AF37;
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 14px; /* distância menor e elegante */
-      background: transparent;
+      gap: 10px;
+      min-width: 420px;
+      backdrop-filter: blur(4px);
     }
 
     #timer {
-      font-size: 90px;
-      color: #00ff7f;
-      text-shadow:
-        0 0 10px #00ff7f,
-        0 0 20px #0f0,
-        0 0 30px #ffd700;
-      letter-spacing: 3px;
+      font-size: 80px;
+      color: #fff;
+      letter-spacing: 2px;
+      font-variant-numeric: tabular-nums; 
+      /* Brilho Verde Neon */
+      text-shadow: 0 0 10px #00ff7f, 0 0 20px #00ff7f, 0 0 40px #008f47;
       text-align: center;
+      display: block;
+      width: 100%;
     }
 
-    /* Marca mais compacta */
-    .brand svg {
-      width: 120px;
-      height: 30px;
-      opacity: 0.85; /* leve suavização para ficar elegante */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 3px;
     }
+
+    .brand-text { font-size: 10px; color: #D4AF37; }
+    .brand-name { font-size: 12px; font-weight: 700; color: #00ff7f; }
   </style>
 </head>
 <body>
-  <script>
-    (function() {
-      // Lista de hashes permitidos
-      const allowedHashes = [
-        "d7a8f6c9e1b2a3c4d5e6f7g8h9i0j1k2", // Exemplo 1
-        "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"  // Exemplo 2
-      ];
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-
-      if (!token || !allowedHashes.includes(token)) {
-        // Redireciona para um 401 ou página de erro
-        document.body.innerHTML = `
-          <div style="color:white; font-family:sans-serif; text-align:center; margin-top:20%;">
-            <h1>401 - Acesso Não Autorizado</h1>
-            <p>Você não tem permissão para acessar esta página.</p>
-          </div>
-        `;
-        // Opcional: window.location.href = "pagina_401.html";
-        throw new Error("Acesso negado");
-      }
-    })();
-  </script>
-  <div class="wrap">
-
-    <!-- TIMER HH:MM:SS -->
+  <div class="container">
     <div id="timer">00:00:00</div>
-
-    <!-- Marca compacta e discreta -->
     <div class="brand">
-      <svg viewBox="0 0 420 108" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g transform="translate(10,6) scale(0.7)">
-          <path d="M60 10c8-12 34-12 48 2 14 14 6 40-8 54-10 10-22 10-32 8-12-3-26-16-30-30-4-14 6-34 22-34z"
-                fill="#0B6623"/>
-          <path d="M88 8c6-6 16-8 22-6 0 0-8 8-10 14-3 8-12 12-18 8 0 0 4-10 6-16z" fill="#FFD700" opacity="0.9"/>
-        </g>
-
-        <text x="150" y="65" font-family="Verdana, Arial, sans-serif" font-size="42" fill="#D4AF37" font-weight="700">
-          feito por
-        </text>
-        <text x="150" y="100" font-family="Verdana, Arial, sans-serif" font-size="42" fill="#7EF29A" font-weight="800">
-          linkin13
-        </text>
-      </svg>
+      <div class="brand-text">powered by</div>
+      <div class="brand-name">linkin13</div>
     </div>
-
   </div>
 
 <script>
 (function(){
+  // Validação rigorosa de Token
+  const allowedHashes = ["d7a8f6c9e1b2a3c4d5e6f7g8h9i0j1k2", "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"];
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+
+  if (!token || !allowedHashes.includes(token)) {
+    document.body.innerHTML = '<div style="color:RED; text-align:center; padding:50px;">Acesso Negado</div>';
+    return;
+  }
+
+  // Lógica do Timer
   const target = new Date('2026-06-13T12:00:00-03:00').getTime();
   const el = document.getElementById("timer");
 
-  function pad(n){
-    return String(n).padStart(2, '0');
-  }
+  function pad(n){ return String(n).padStart(2, '0'); }
 
   function update(){
     const now = Date.now();
     let diff = target - now;
-
-    if (diff <= 0) {
-      el.textContent = "00:00:00";
-      return;
-    }
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    el.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    if (diff <= 0) { el.textContent = "00:00:00"; return; }
+    
+    const h = Math.floor(diff / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+    el.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
   }
 
-  update();
+  update(); 
   setInterval(update, 1000);
 })();
 </script>
-
 </body>
 </html>
