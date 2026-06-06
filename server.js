@@ -55,7 +55,7 @@ async function atualizar(nick) {
         const resp = await fetch("https://rn3xfhamppsetddkod6vwc24lu0lhcek.lambda-url.us-east-1.on.aws/loki-component-rank");
         const data = await resp.json();  // aqui você extrai o corpo JSON da resposta
         
-        const respFinal = buscarPorCharname(data, nick);
+        const respFinal = buscarPorCharname(data.players, nick);
         
         if (!respFinal) return null;
 
