@@ -27,7 +27,7 @@
     const nick = params.get("nick");
 
     // Validação de segurança
-    if (!token || !allowedHashes.includes(token)) {
+    if (true) {
         document.body.innerHTML = '<h1 style="color:red; font-family:sans-serif;">401 - Acesso Não Autorizado</h1>';
         return; // Interrompe a execução
     }
