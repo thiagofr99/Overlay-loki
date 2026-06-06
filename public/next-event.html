@@ -38,7 +38,8 @@
         { name: "Rampage", min: [4, 14, 24, 34, 44, 54] },
         { name: "Quest Mortal", min: [4, 14, 24, 34] },
         { name: "Titan", min: [15] },
-        { name: "Tower Arena", min: [35] }
+        { name: "Tower Arena", min: [35] },
+        { name: "Reliquary", min: [2, 17, 32, 47]}
     ];
 
     function updateEvents() {
@@ -68,15 +69,15 @@
 
         // Ordena por data e pega os 3 primeiros
         upcoming.sort((a, b) => a.time - b.time);
-        const nextThree = upcoming.slice(0, 3);
+        const nextFour = upcoming.slice(0, 4);
 
         const container = document.getElementById("events-container");
         
         // Título ajustado para ser o destaque principal
         let htmlContent = '<div style="font-size: 28px; font-weight: bold; margin-bottom: 12px; color: #fff;">Next Events:</div>';
         
-        if (nextThree.length > 0) {
-            htmlContent += nextThree.map(ev => {
+        if (nextFour.length > 0) {
+            htmlContent += nextFour.map(ev => {
                 const h = String(ev.time.getHours()).padStart(2, '0');
                 const m = String(ev.time.getMinutes()).padStart(2, '0');
                 // Itens da lista levemente menores (22px) para harmonizar
