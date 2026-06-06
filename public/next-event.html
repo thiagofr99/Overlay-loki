@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Eventos Loki</title>
+</head>
+<body style="background: transparent; margin: 0; font-family: Arial, sans-serif;">
+
+    <div id="events-container" style="color: white; font-size: 32px; text-shadow: 2px 2px 4px black; padding: 20px;">
+        Carregando eventos...
+    </div>
+
+<script>
+(function() {
+    // Lista de hashes permitidos para segurança
+    const allowedHashes = [
+        "d7a8f6c9e1b2a3c4d5e6f7g8h9i0j1k2",
+        "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+    ];
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    // Validação de segurança
+    if (!token || !allowedHashes.includes(token)) {
+        document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:50px;">401 - Acesso Não Autorizado</h1>';
+        return;
+    }
+
+    // Tabela de eventos: minutos definidos para o padrão xx:xN
+    const eventTable = [
+        { name: "Desert Royal", min: [0] },
+        { name: "Chrono Waves", min: [2, 12, 22, 32, 42, 52] },
+        { name: "Rampage", min: [4, 14, 24, 34, 44, 54] },
+        { name: "Quest Mortal", min: [4, 14, 24, 34] },
+        { name: "Titan", min: [15] },
+        { name: "Tower Arena", min: [35] }
+    ];
+
+    function updateEvents() {
+        const now = new Date();
+        let upcoming = [];
+        
+        // Look-ahead de 3 horas para garantir que a lista nunca fique vazia
+        for (let h = 0; h < 3; h++) {
+            let targetHour = new Date();
+            targetHour.setHours(now.getHours() + h);
+            
+            eventTable.forEach(ev => {
+                ev.min.forEach(m => {
+                    let eventTime = new Date(targetHour);
+                    eventTime.setMinutes(m);
+                    eventTime.setSeconds(0, 0);
+
+                    // Só adiciona se for no futuro
+                    if (eventTime > now) {
+                        upcoming.push({ name: ev.name, time: eventTime });
+                    }
+                });
+            });
+            
+            if (upcoming.length > 5) break;
+        }
+
+        // Ordena por data e pega os 3 primeiros
+        upcoming.sort((a, b) => a.time - b.time);
+        const nextThree = upcoming.slice(0, 3);
+
+        const container = document.getElementById("events-container");
+        if (nextThree.length > 0) {
+            container.innerHTML = nextThree.map(ev => {
+                const h = String(ev.time.getHours()).padStart(2, '0');
+                const m = String(ev.time.getMinutes()).padStart(2, '0');
+                return `<div style="margin-bottom: 10px;">${ev.name} <span style="color:#00ff7f;">${h}:${m}</span></div>`;
+            }).join('');
+        }
+    }
+
+    updateEvents();
+    setInterval(updateEvents, 10000); // Atualiza a cada 10 segundos
+})();
+</script>
+</body>
+</html>
