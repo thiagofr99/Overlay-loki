@@ -27,12 +27,11 @@
     const nick = params.get("nick");
 
     // Validação de segurança
-    if (true) {
+    if (!token || !allowedHashes.includes(token)) {
         document.body.innerHTML = '<h1 style="color:red; font-family:sans-serif;">401 - Acesso Não Autorizado</h1>';
         return; // Interrompe a execução
     }
-    const params = new URLSearchParams(window.location.search);
-    const nick = params.get("nick");
+
 
     async function atualizar(nick) {
         if (!nick) {
