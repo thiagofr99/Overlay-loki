@@ -70,13 +70,20 @@
         const nextThree = upcoming.slice(0, 3);
 
         const container = document.getElementById("events-container");
+        
+        // Título ajustado para ser o destaque principal
+        let htmlContent = '<div style="font-size: 28px; font-weight: bold; margin-bottom: 12px; color: #fff;">Next Events:</div>';
+        
         if (nextThree.length > 0) {
-            container.innerHTML = nextThree.map(ev => {
+            htmlContent += nextThree.map(ev => {
                 const h = String(ev.time.getHours()).padStart(2, '0');
                 const m = String(ev.time.getMinutes()).padStart(2, '0');
-                return `<div style="margin-bottom: 10px;">${ev.name} <span style="color:#00ff7f;">${h}:${m}</span></div>`;
+                // Itens da lista levemente menores (22px) para harmonizar
+                return `<div style="font-size: 22px; margin-bottom: 8px;">${ev.name} <span style="color:#00ff7f; font-weight: bold;">${h}:${m}</span></div>`;
             }).join('');
         }
+        
+        container.innerHTML = htmlContent;
     }
 
     updateEvents();
