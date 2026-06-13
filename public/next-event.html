@@ -32,13 +32,13 @@
 
     // Tabela de eventos: minutos definidos para o padrão xx:xN
     const eventTable = [
-        { name: "Royal Arena", min: [0] },
-        { name: "Desert Royal", min: [0] },
+        { name: "Royal Arena", min: [40], canal: 1 },
+        { name: "Desert Royal", min: [0], canal: 2 },
         { name: "Chrono Waves", min: [0, 10, 20, 30, 40, 50] },
         { name: "Rampage", min: [4, 14, 24, 34, 44, 54] },
         { name: "Quest Mortal", min: [4, 14, 24, 34] },
-        { name: "Titan", min: [15] },
-        { name: "Tower Arena", min: [35] },
+        { name: "Titan", min: [15], canal: 3 },
+        { name: "Tower Arena", min: [20], canal: 4 },
         { name: "Reliquary", min: [2, 17, 32, 47]}
     ];
 
@@ -59,7 +59,7 @@
 
                     // Só adiciona se for no futuro
                     if (eventTime > now) {
-                        upcoming.push({ name: ev.name, time: eventTime });
+                        upcoming.push({ name: ev.name, time: eventTime, canal: ev.canal || "todos" });
                     }
                 });
             });
@@ -81,7 +81,7 @@
                 const h = String(ev.time.getHours()).padStart(2, '0');
                 const m = String(ev.time.getMinutes()).padStart(2, '0');
                 // Itens da lista levemente menores (22px) para harmonizar
-                return `<div style="font-size: 22px; margin-bottom: 8px;">${ev.name} <span style="color:#00ff7f; font-weight: bold;">${h}:${m}</span></div>`;
+                return `<div style="font-size: 22px; margin-bottom: 8px;">${ev.name} <span style="color:#00ff7f; font-weight: bold;">${h}:${m}</span><span style="color:#00ff7f; font-weight: bold;"> Server: ${ev.canal}</span></div>`;
             }).join('');
         }
         
