@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --gold:#d8bc74;
+    --gold-soft:#f0ddb0;
+    --bg:#08120d;
+    --border:rgba(216,188,116,.25);
+    --text:#f5f5f5;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:linear-gradient(135deg,#08120d,#0f2b1c);
+    color:var(--text);
+    padding:20px;
+}
+
+#app{
+    max-width:1100px;
+    margin:auto;
+}
+
+/* HEADER */
+.header{
+    background:rgba(9,20,13,.85);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:20px;
+    transition:.3s;
+}
+
+.title{
+    font-family:'Cinzel',serif;
+    color:var(--gold-soft);
+    font-size:22px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-top:15px;
+}
+
+.card{
+    background:rgba(0,0,0,.25);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+}
+
+/* BAR */
+.bar{
+    height:10px;
+    background:#0a1a12;
+    border-radius:999px;
+    margin-top:12px;
+    overflow:hidden;
+}
+
+.bar-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--gold-soft),var(--gold));
+    transition:.3s;
+}
+
+/* MISSÕES */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:15px;
+}
+
+.mission{
+    background:rgba(9,20,13,.85);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    transition:.3s;
+}
+
+.mission h3{
+    font-family:'Cinzel',serif;
+    color:var(--gold-soft);
+    margin-bottom:10px;
+}
+
+.level{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:8px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.05);
+}
+
+.level button{
+    background:transparent;
+    border:1px solid var(--gold);
+    color:var(--gold-soft);
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:12px;
+    transition:.2s;
+}
+
+.level button:hover{
+    background:rgba(216,188,116,.1);
+}
+
+.level button:disabled{
+    opacity:.3;
+    cursor:not-allowed;
+}
+
+.done{
+    color:#7CFF9B;
+}
+
+/* LOCK STATE */
+.locked{
+    filter:grayscale(.4);
+    opacity:.7;
+}
+
+.lock-banner{
+    text-align:center;
+    font-family:'Cinzel',serif;
+    color:var(--gold-soft);
+    margin-bottom:10px;
+    display:none;
+}
+
+.lock-banner.active{
+    display:block;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+    <div class="header" id="header">
+
+        <div class="title">📖 Livro de Atividades</div>
+
+        <div class="lock-banner" id="lockBanner">
+            🔒 Livro completo — cargas esgotadas
+        </div>
+
+        <div class="stats">
+
+            <div class="card">
+                <div>Cargas</div>
+                <div id="charges">0 / 12</div>
+            </div>
+
+            <div class="card">
+                <div>Resgatadas</div>
+                <div id="claimed">0</div>
+            </div>
+
+            <div class="card">
+                <div>Progresso</div>
+                <div id="percent">0%</div>
+            </div>
+
+        </div>
+
+        <div class="bar">
+            <div class="bar-fill" id="bar"></div>
+        </div>
+
+    </div>
+
+    <div class="grid" id="missions"></div>
+
+</div>
+
+<script>
+
+const TASK_TYPE = "daily_activity_book";
+const MAX_CHARGES = 12;
+
+let state = {};
+let isLocked = false;
+
+function getToday() {
+
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+const MISSIONS = {
+    arena: "⚔ Arena",
+    boss_rampage: "👹 Boss Rampage",
+    chrono_waves: "⏳ Chrono Waves",
+    desert_royale: "🏜 Desert Royale",
+    mortal_quest: "⚔ Mortal Quest",
+    muspellheim: "🔥 Muspellheim",
+    reliquary: "💠 Reliquary",
+    taron_loot: "💰 Taron Loot"
+};
+
+//
+// AUTH
+//
+async function verifySession() {
+
+    const res = await fetch("/api/check-session", {
+        credentials: "include"
+    });
+
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+        window.location.href = "main.html";
+        return false;
+    }
+
+    return true;
+}
+
+//
+// BOOT
+//
+(async () => {
+
+    const ok = await verifySession();
+    if (!ok) return;
+
+    loadTasks();
+
+})();
+
+//
+// LOAD
+//
+//
+// LOAD
+//
+async function loadTasks() {
+
+    try {
+
+        const res = await fetch(
+            `/api/task?taskType=${encodeURIComponent(TASK_TYPE)}&date=${getToday()}`,
+            {
+                credentials: "include"
+            }
+        );
+
+        if (!res.ok) {
+
+            console.error(
+                "Erro ao carregar tarefas:",
+                res.status
+            );
+
+            initIfEmpty();
+            render();
+
+            return;
+        }
+
+        const data = await res.json();
+
+        state = {};
+
+        const tasks = data.tasks || {};
+
+        for (const key in tasks) {
+
+            const [mission, level] = key.split(".");
+
+            if (!mission || !level) {
+                continue;
+            }
+
+            if (!state[mission]) {
+                state[mission] = {};
+            }
+
+            state[mission][level] = tasks[key];
+
+        }
+
+        initIfEmpty();
+
+        render();
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao carregar tarefas:",
+            error
+        );
+
+        initIfEmpty();
+
+        render();
+
+    }
+
+}
+
+
+
+//
+// INIT
+//
+function initIfEmpty() {
+
+    for (const m in MISSIONS) {
+
+        if (!state[m]) {
+            state[m] = {};
+        }
+
+        if (state[m].level_1 === undefined) {
+            state[m].level_1 = false;
+        }
+
+        if (state[m].level_2 === undefined) {
+            state[m].level_2 = false;
+        }
+
+        if (state[m].level_3 === undefined) {
+            state[m].level_3 = false;
+        }
+
+    }
+
+}
+
+function taskKey(mission, level) {
+    return `${mission}.${level}`;
+}
+
+//
+// TOGGLE
+//
+//
+// TOGGLE
+//
+async function toggleClaim(mission, level) {
+    
+    const current = state[mission][level];
+
+    // Bloqueia apenas novos registros
+    if (isLocked && !current) {
+        return;
+    }
+
+    try {
+
+        const res = await fetch(
+            "/api/task",
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    taskType: TASK_TYPE,
+                    task: taskKey(mission, level),
+                    completed: !current
+                })
+            }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+
+            state[mission][level] = !current;
+
+            render();
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao salvar tarefa:",
+            error
+        );
+
+    }
+
+}
+
+//
+// CHARGES
+//
+function calcCharges(){
+
+    let used = 0;
+
+    for (const m in state){
+        for (const l in state[m]){
+            if (state[m][l]) used++;
+        }
+    }
+
+    return used;
+}
+
+//
+// RENDER
+//
+function render(){
+
+    const container = document.getElementById("missions");
+    container.innerHTML = "";
+
+    const used = calcCharges();
+
+    updateStats(used);
+
+    isLocked = used >= MAX_CHARGES;
+
+    document.getElementById("header").classList.toggle("locked", isLocked);
+    document.getElementById("lockBanner").classList.toggle("active", isLocked);
+
+    for (const m in MISSIONS){
+
+        const box = document.createElement("div");
+        box.className = "mission";
+
+        box.innerHTML = `<h3>${MISSIONS[m]}</h3>`;
+
+        for (let i=1;i<=3;i++){
+
+            const lvl = `level_${i}`;
+            const done = state[m][lvl];
+
+            const row = document.createElement("div");
+            row.className = "level";
+
+            const disableButton =
+            isLocked && !done;
+
+            row.innerHTML = `
+                <span class="${done ? 'done' : ''}">
+                    Nível ${i}
+                </span>
+
+                <button
+                    onclick="toggleClaim('${m}','${lvl}')"
+                    ${disableButton ? "disabled" : ""}
+                >
+                    ${done ? "Desfazer" : "Resgatar"}
+                </button>
+            `;
+
+            box.appendChild(row);
+        }
+
+        container.appendChild(box);
+    }
+}
+
+//
+// STATS
+//
+function updateStats(used){
+
+    const percent = Math.round((used / MAX_CHARGES) * 100);
+
+    document.getElementById("charges").innerText =
+        `${used} / ${MAX_CHARGES}`;
+
+    document.getElementById("claimed").innerText = used;
+
+    document.getElementById("percent").innerText = percent + "%";
+
+    document.getElementById("bar").style.width = percent + "%";
+}
+
+</script>
+
+</body>
+</html>
